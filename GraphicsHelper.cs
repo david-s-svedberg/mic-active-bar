@@ -1,19 +1,19 @@
 ﻿using System.Drawing.Imaging;
+using MicActiveBar.Properties;
 
 namespace MicActiveBar
 {
     internal static class GraphicsHelper
     {
-
-        public static Icon Darken(this Icon icon, float darkenFactor)
+        internal static Icon Darken(this Icon icon, float darkenFactor)
         {
             return icon.ToBitmap().Darken(darkenFactor).ToIcon();
         }
 
-        public static Icon ToIcon(this Image img)
+        internal static Icon ToIcon(this Image img)
         {
-            var ms = new MemoryStream();
-            var bw = new BinaryWriter(ms);
+            using var ms = new MemoryStream();
+            using var bw = new BinaryWriter(ms);
             // Header
             bw.Write((short)0);   // 0 : reserved
             bw.Write((short)1);   // 2 : 1=ico, 2=cur
@@ -44,29 +44,29 @@ namespace MicActiveBar
             return new Icon(ms);
         }
 
-        public static Bitmap Darken(this Bitmap b, float intensity)
+        internal static Bitmap Darken(this Bitmap b, float intensity)
         {
-            Bitmap b2 = new Bitmap(b.Width, b.Height);
+            var darkened = new Bitmap(b.Width, b.Height);
 
-            ImageAttributes ia = new ImageAttributes();
-
-            ColorMatrix m = new ColorMatrix(new float[][] {
+            var m = new ColorMatrix(new[]
+            {
                 new float[] { 1, 0, 0, 0, 0 },
                 new float[] { 0, 1, 0, 0, 0 },
                 new float[] { 0, 0, 1, 0, 0 },
-                new float[] { 0, 0, 0, intensity, 0 },
+                new[] { 0, 0, 0, intensity, 0 },
                 new float[] { 0, 0, 0, 0, 1 }
             });
 
+            using var ia = new ImageAttributes();
+            using var g = Graphics.FromImage(darkened);
             ia.SetColorMatrix(m);
-            Graphics g = Graphics.FromImage(b2);
             g.DrawImage(b, new Rectangle(0, 0, b.Width, b.Height), 0, 0, b.Width, b.Height, GraphicsUnit.Pixel, ia);
-            return b2;
+            return darkened;
         }
 
-        public static Icon GetSoundIndicationIcon(MABOptions options)
+        public static Icon GetSoundIndicationIcon(MabOptions options)
         {
-            return Properties.Resources.no_sound.Darken(options.Darken);
+            return Resources.no_sound.Darken(options.Darken);
         }
     }
 }

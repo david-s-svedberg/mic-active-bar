@@ -1,38 +1,39 @@
 using CommandLine;
+using MicActiveBar.Properties;
 
 namespace MicActiveBar
 {
-    static class Program
+    internal static class Program
     {
-        static Icon? soundIcon = null;
+        private static Icon? soundIcon;
 
         [STAThread]
-        public static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            Parser.Default.ParseArguments<MABOptions>(args).WithParsed(options =>
+            Parser.Default.ParseArguments<MabOptions>(args).WithParsed(options =>
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
                 soundIcon = GraphicsHelper.GetSoundIndicationIcon(options);
-                SetupMAB(options);
+                SetupMab(options);
                 Application.Run();
             });
         }
 
-        private static void SetupMAB(MABOptions options)
+        private static void SetupMab(MabOptions options)
         {
-            NotifyIcon icn = new NotifyIcon();
+            var icn = new NotifyIcon();
             SoundHelper.MonitorAudioThreshold(
-                options.Threshold, 
-                onOver: () => icn.Icon = soundIcon, 
-                onUnder: () => icn.Icon = Properties.Resources.no_sound);
+                options.Threshold,
+                onOver: () => icn.Icon = soundIcon,
+                onUnder: () => icn.Icon = Resources.no_sound);
 
-            icn.Click += new EventHandler(HandleIconClicked);
+            icn.Click += HandleIconClicked;
             icn.Visible = true;
-            icn.Icon = Properties.Resources.no_sound;
+            icn.Icon = Resources.no_sound;
         }
 
-        static void HandleIconClicked(object? sender, EventArgs e)
+        private static void HandleIconClicked(object? sender, EventArgs e)
         {
             Application.Exit();
         }
